@@ -9,7 +9,8 @@ module.exports = {
       env: {
         PORT: process.env.REACT_APP_PORT,
         REACT_APP_FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
-        REACT_APP_FACEBOOK_REDIRECT_URI: process.env.FACEBOOK_REDIRECT_URI
+        REACT_APP_FACEBOOK_REDIRECT_URI: process.env.FACEBOOK_REDIRECT_URI,
+        REACT_APP_FACEBOOK_USER_SCOPES: process.env.FACEBOOK_USER_SCOPES
       }
     },
     {

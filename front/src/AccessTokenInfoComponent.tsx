@@ -16,14 +16,19 @@ const AccessTokenInfoComponent = ({
         <li>App Id: {accessTokenInfo.appId}</li>
         <li>Application: {accessTokenInfo.application}</li>
         <li>Type: {accessTokenInfo.type}</li>
-        <li>Data Access Expires At: {accessTokenInfo.dataAccessExpiresAt}</li>
         <li>
-          Expires At:{" "}
+          Data Access Expires At:
+          {new Date(
+            accessTokenInfo.dataAccessExpiresAt * 1000
+          ).toLocaleString()}
+        </li>
+        <li>
+          Expires At:
           {new Date(accessTokenInfo.expiresAt * 1000).toLocaleString()}
         </li>
         <li>Is Valid: {accessTokenInfo.isValid ? "true" : "false"}</li>
         <li>
-          Issued At:{" "}
+          Issued At:
           {new Date(accessTokenInfo.issuedAt * 1000).toLocaleString()}
         </li>
         <li>User ID: {accessTokenInfo.userId}</li>

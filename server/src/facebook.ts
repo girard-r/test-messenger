@@ -116,7 +116,4 @@ export const handleFacebookAuth = async (
       logError(e);
     }
   }
-  // io.to(clientSocketId).emit("accessToken", {
-  //   accessToken: res.data.access_token,
-  // });
 };

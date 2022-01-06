@@ -14,8 +14,7 @@ interface FacebookConnectProps {
 }
 
 const FacebookConnect = ({ setAccessTokenInfo }: FacebookConnectProps) => {
-  const SCOPES_TO_ASK =
-    "business_management,pages_show_list,email,pages_read_user_content,pages_manage_engagement,pages_read_engagement,pages_manage_metadata,pages_messaging";
+  const SCOPES_TO_ASK = process.env.REACT_APP_FACEBOOK_USER_SCOPES;
   const [hidden, setHidden] = useState<boolean>(true);
   const socket = useContext(SocketContext);
 

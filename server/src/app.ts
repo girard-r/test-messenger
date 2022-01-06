@@ -32,8 +32,12 @@ app.get("/facebook/login", (req, res) => {
 });
 
 /**
- * Server listens
+ * Server
  */
+server.on("error", (err) => {
+  logError(err);
+});
+
 server.listen(port, () => {
   return logDebug(`Express is listening at http://localhost:${port}`);
 });
