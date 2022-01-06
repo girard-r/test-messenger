@@ -59,9 +59,15 @@ const FacebookConnect = () => {
           <li>Application: {accessTokenInfo.application}</li>
           <li>Type: {accessTokenInfo.type}</li>
           <li>Data Access Expires At: {accessTokenInfo.dataAccessExpiresAt}</li>
-          <li>Expires At: {accessTokenInfo.expiresAt}</li>
+          <li>
+            Expires At:{" "}
+            {new Date(accessTokenInfo.expiresAt * 1000).toLocaleString()}
+          </li>
           <li>Is Valid: {accessTokenInfo.isValid ? "true" : "false"}</li>
-          <li>Issued At: {accessTokenInfo.issuedAt}</li>
+          <li>
+            Issued At:{" "}
+            {new Date(accessTokenInfo.issuedAt * 1000).toLocaleString()}
+          </li>
           <li>User ID: {accessTokenInfo.userId}</li>
           <li>
             Scopes:
