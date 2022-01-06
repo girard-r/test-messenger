@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import FacebookConnect from "./FacebookConnect";
 import { socket, SocketContext } from "./context/socket";
 import AccessTokenInfoComponent from "./AccessTokenInfoComponent";
+import PagesInfoComponent from "./PagesInfoComponent";
 
 export interface AccessTokenInfo {
   accessToken: string;
@@ -26,7 +27,10 @@ const App = () => {
       <SocketContext.Provider value={socket}>
         <FacebookConnect setAccessTokenInfo={setAccessTokenInfo} />
         {!!accessTokenInfo && (
-          <AccessTokenInfoComponent accessTokenInfo={accessTokenInfo} />
+          <>
+            <AccessTokenInfoComponent accessTokenInfo={accessTokenInfo} />
+            <PagesInfoComponent />
+          </>
         )}
       </SocketContext.Provider>
     </div>

@@ -7,6 +7,11 @@ const logError = getLogger("APP:SOCKETIO");
 
 export interface SocketIOState {
   [socketId: string]: {
+    pagesInfo: Array<{
+      accessToken: string;
+      id: string;
+      name: string;
+    }>;
     accessTokenInfo?: {
       accessToken: string;
       tokenType: string;
@@ -45,7 +50,7 @@ export const createServerSocket = (
 
   io.on("connection", (socket) => {
     logDebug(`Client ${socket.id} connected`);
-    clients[socket.id] = {};
+    clients[socket.id] = { pagesInfo: [] };
     socket.on("disconnect", () => {
       logDebug(`Client ${socket.id} disconnected`);
       delete clients[socket.id];

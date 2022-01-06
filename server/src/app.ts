@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import getLogger, { LogLevel } from "./log";
 import http from "http";
-import { handleFacebookAuth } from "./facebook";
+import { handleFacebookAuth, handleGetPages } from "./facebook";
 import { createServerSocket } from "./socketio";
 
 /**
@@ -24,11 +24,17 @@ const socketIOServer = createServerSocket(server);
 /**
  * App Routes
  */
-app.get("/facebook/login", (req, res) => {
+app.get("/api/facebook/login", (req, res) => {
   const { code, state } = req.query;
   logDebug(`Received code ${code} and state ${state}`);
   handleFacebookAuth(code as string, state as string, socketIOServer);
   res.send("<script>window.close();</script>");
+});
+
+app.get("/api/facebook/:socketId/pages", (req, res) => {
+  const { socketId } = req.params;
+  handleGetPages(socketId, socketIOServer);
+  return res.status(200);
 });
 
 /**

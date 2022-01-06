@@ -24,6 +24,12 @@ export interface FBAccessTokenVerifInfo {
   user_id: string;
 }
 
+export interface ListPagesInfo {
+  name: string;
+  access_token: string;
+  id: string;
+}
+
 export const getUserAccessToken = (code: string) => {
   const url = "https://graph.facebook.com/v12.0/oauth/access_token";
   return axios.get(url, {
@@ -47,6 +53,17 @@ export const getApplicationAccessToken = () => {
   });
 };
 
+// Dont handle pagination for now
+export const getUserPages = (fbUserId: string, userAccessToken: string) => {
+  const url = `https://graph.facebook.com/${fbUserId}/accounts`;
+  return axios.get(url, {
+    params: {
+      access_token: userAccessToken,
+      fields: "name,access_token",
+    },
+  });
+};
+
 export const verifyAccessToken = async (
   appAccessToken: string,
   inputToken: string
@@ -63,10 +80,37 @@ const getSocketIdFromFBState = (state: string): string | undefined => {
   return match.length > 1 ? match[1] : undefined;
 };
 
+export const handleGetPages = async (
+  socketId: string,
+  socketio: SocketIOServerSocket
+) => {
+  const { accessToken, userId } = socketio.state[socketId].accessTokenInfo;
+  try {
+    const res: { data: { data: ListPagesInfo[] } } = await getUserPages(
+      userId,
+      accessToken
+    );
+    for (const pageInfo of res.data.data) {
+      socketio.state[socketId].pagesInfo.push({
+        name: pageInfo.name,
+        accessToken: pageInfo.access_token,
+        id: pageInfo.id,
+      });
+    }
+    socketio.io.to(socketId).emit("pages", socketio.state[socketId].pagesInfo);
+  } catch (e) {
+    logError(e);
+  }
+};
+
 export const loadApplicationAuth = async () => {
-  const { data }: { data: FBAccessTokenData } =
-    await getApplicationAccessToken();
-  appState.fbAccessToken = data.access_token;
+  try {
+    const { data }: { data: FBAccessTokenData } =
+      await getApplicationAccessToken();
+    appState.fbAccessToken = data.access_token;
+  } catch (e) {
+    logError(e);
+  }
 };
 
 export const handleFacebookAuth = async (
@@ -92,6 +136,7 @@ export const handleFacebookAuth = async (
 
       // Fill client state associated with access token info
       socketio.state[clientSocketId] = {
+        ...socketio.state[clientSocketId],
         accessTokenInfo: {
           accessToken: accessRes.data.access_token,
           tokenType: accessRes.data.token_type,
