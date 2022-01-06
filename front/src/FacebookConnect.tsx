@@ -2,11 +2,27 @@ import React, { useState, useContext, useEffect } from "react";
 import NewWindow from "react-new-window";
 import { SocketContext } from "./context/socket";
 
+interface AccessTokenInfo {
+  accessToken: string;
+  tokenType: string;
+  appId: string;
+  type: string;
+  application: string;
+  dataAccessExpiresAt: number;
+  expiresAt: number;
+  isValid: boolean;
+  issuedAt: number;
+  scopes: string[];
+  granularScopes: { scope: string }[];
+  userId: string;
+}
+
 const FacebookConnect = () => {
   const SCOPES_TO_ASK =
     "business_management,pages_show_list,email,pages_read_user_content,pages_manage_engagement,pages_read_engagement,pages_manage_metadata,pages_messaging";
   const [hidden, setHidden] = useState<boolean>(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessTokenInfo, setAccessTokenInfo] =
+    useState<AccessTokenInfo | null>(null);
   const socket = useContext(SocketContext);
 
   const showWindow = () => {
@@ -18,8 +34,8 @@ const FacebookConnect = () => {
   };
 
   useEffect(() => {
-    socket.on("accessToken", (res: { accessToken: string }) => {
-      setAccessToken(res.accessToken);
+    socket.on("accessToken", (accessTokenInfo) => {
+      setAccessTokenInfo(accessTokenInfo);
     });
     return () => {
       socket.off("accessToken");
@@ -35,7 +51,40 @@ const FacebookConnect = () => {
         />
       )}
       <button onClick={showWindow}>Connect to Facebook</button>
-      {accessToken && <p>User Access Token: {accessToken}</p>}
+      {accessTokenInfo && (
+        <ul>
+          <li>Access Token: {accessTokenInfo.accessToken}</li>
+          <li>Token Type: {accessTokenInfo.tokenType}</li>
+          <li>App Id: {accessTokenInfo.appId}</li>
+          <li>Application: {accessTokenInfo.application}</li>
+          <li>Type: {accessTokenInfo.type}</li>
+          <li>Data Access Expires At: {accessTokenInfo.dataAccessExpiresAt}</li>
+          <li>Expires At: {accessTokenInfo.expiresAt}</li>
+          <li>Is Valid: {accessTokenInfo.isValid ? "true" : "false"}</li>
+          <li>Issued At: {accessTokenInfo.issuedAt}</li>
+          <li>User ID: {accessTokenInfo.userId}</li>
+          <li>
+            Scopes:
+            <ul>
+              {accessTokenInfo.scopes.map((scope) => {
+                return <li key={scope}>{scope}</li>;
+              })}
+            </ul>
+          </li>
+          <li>
+            Granular Scopes:
+            <ul>
+              {accessTokenInfo.granularScopes.map((scopeObject) => {
+                return (
+                  <li key={scopeObject.scope + "-granular"}>
+                    scope: {scopeObject.scope}
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        </ul>
+      )}
     </div>
   );
 };
