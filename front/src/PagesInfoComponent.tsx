@@ -1,24 +1,25 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import axios from "axios";
 import { SocketContext } from "./context/socket";
+import { FBPageInfo } from "./App";
 
-export interface FBPagesInfo {
-  accessToken: string;
-  id: string;
-  name: string;
+interface PagesInfoComponentProps {
+  pagesInfo: FBPageInfo[];
+  setPagesInfo: React.Dispatch<React.SetStateAction<FBPageInfo[]>>;
 }
 
-const PagesInfoComponent = () => {
+const PagesInfoComponent = ({
+  pagesInfo,
+  setPagesInfo,
+}: PagesInfoComponentProps) => {
   const socket = useContext(SocketContext);
-  const [pagesInfo, setPagesInfo] = useState<FBPagesInfo[]>([]);
 
   useEffect(() => {
-    socket.on("pages", (pagesInfo: FBPagesInfo[]) => {
-      console.log(pagesInfo);
+    socket.on("pages", (pagesInfo: FBPageInfo[]) => {
       setPagesInfo(pagesInfo);
     });
     axios.get(`/api/facebook/${socket.id}/pages`);
-  }, [socket]);
+  }, [socket, setPagesInfo]);
 
   return (
     <div>

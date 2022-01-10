@@ -5,27 +5,39 @@ import http from "http";
 const logDebug = getLogger("APP:SOCKETIO", LogLevel.DEBUG);
 const logError = getLogger("APP:SOCKETIO");
 
+export interface MessageInfo {
+  msgId: string;
+  timestamp: number;
+  text: string;
+  senderId: string;
+}
+
+export interface PageInfo {
+  accessToken: string;
+  id: string;
+  name: string;
+  lastMessageReceived?: MessageInfo;
+}
+
+export interface AccessTokenInfo {
+  accessToken: string;
+  tokenType: string;
+  appId: string;
+  type: string;
+  application: string;
+  dataAccessExpiresAt: number;
+  expiresAt: number;
+  isValid: boolean;
+  issuedAt: number;
+  scopes: string[];
+  granularScopes: { scope: string }[];
+  userId: string;
+}
+
 export interface SocketIOState {
   [socketId: string]: {
-    pagesInfo: Array<{
-      accessToken: string;
-      id: string;
-      name: string;
-    }>;
-    accessTokenInfo?: {
-      accessToken: string;
-      tokenType: string;
-      appId: string;
-      type: string;
-      application: string;
-      dataAccessExpiresAt: number;
-      expiresAt: number;
-      isValid: boolean;
-      issuedAt: number;
-      scopes: string[];
-      granularScopes: { scope: string }[];
-      userId: string;
-    };
+    pagesInfo: Array<PageInfo>;
+    accessTokenInfo?: AccessTokenInfo;
   };
 }
 

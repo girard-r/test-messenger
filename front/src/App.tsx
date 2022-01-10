@@ -3,6 +3,7 @@ import FacebookConnect from "./FacebookConnect";
 import { socket, SocketContext } from "./context/socket";
 import AccessTokenInfoComponent from "./AccessTokenInfoComponent";
 import PagesInfoComponent from "./PagesInfoComponent";
+import QuickMessenger from "./QuickMessenger";
 
 export interface AccessTokenInfo {
   accessToken: string;
@@ -19,9 +20,16 @@ export interface AccessTokenInfo {
   userId: string;
 }
 
+export interface FBPageInfo {
+  accessToken: string;
+  id: string;
+  name: string;
+}
+
 const App = () => {
   const [accessTokenInfo, setAccessTokenInfo] =
     useState<AccessTokenInfo | null>(null);
+  const [pagesInfo, setPagesInfo] = useState<FBPageInfo[]>([]);
   return (
     <div>
       <SocketContext.Provider value={socket}>
@@ -29,7 +37,11 @@ const App = () => {
         {!!accessTokenInfo && (
           <>
             <AccessTokenInfoComponent accessTokenInfo={accessTokenInfo} />
-            <PagesInfoComponent />
+            <PagesInfoComponent
+              pagesInfo={pagesInfo}
+              setPagesInfo={setPagesInfo}
+            />
+            <QuickMessenger pagesInfo={pagesInfo} />
           </>
         )}
       </SocketContext.Provider>
