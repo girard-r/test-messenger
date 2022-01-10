@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FBPageInfo } from "./App";
 import { SocketContext } from "./context/socket";
+import { useForm } from "react-hook-form";
+import axios from "axios";
 
 interface QuickMessengerProps {
   pagesInfo: FBPageInfo[];
@@ -20,6 +22,7 @@ export interface MessageInfo {
 const QuickMessengerPerPage = ({ pageInfo }: QuickMessengerPerPageProps) => {
   const socket = useContext(SocketContext);
   const [lastMessage, setLastMessage] = useState<MessageInfo | null>(null);
+  const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     socket.on(`newMessage/${pageInfo.id}`, (message) => {
@@ -30,11 +33,41 @@ const QuickMessengerPerPage = ({ pageInfo }: QuickMessengerPerPageProps) => {
     };
   }, [socket, pageInfo]);
 
+  const onSubmit =
+    (pageAccessToken: string, recipientId: string) =>
+    ({ message }: { message: string }) => {
+      axios.post(
+        "https://graph.facebook.com/v12.0/me/messages",
+        {
+          messaging_type: "RESPONSE",
+          recipient: {
+            id: recipientId,
+          },
+          message: {
+            text: message,
+          },
+        },
+        {
+          params: { access_token: pageAccessToken },
+        }
+      );
+      reset();
+    };
+
   return (
     <div>
       <div>{pageInfo.name}</div>
       <div>Last message received: {lastMessage?.text}</div>
-      <div>Send: </div>
+      {lastMessage?.senderId && (
+        <form
+          onSubmit={handleSubmit(
+            onSubmit(pageInfo.accessToken, lastMessage.senderId)
+          )}
+        >
+          <input {...register("message")} />
+          <input type="submit" />
+        </form>
+      )}
     </div>
   );
 };
