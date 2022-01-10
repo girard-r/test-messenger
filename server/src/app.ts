@@ -1,4 +1,4 @@
-import express, { text } from "express";
+import express from "express";
 import cors from "cors";
 import getLogger, { LogLevel } from "./log";
 import http from "http";
