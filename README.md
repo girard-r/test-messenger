@@ -5,11 +5,6 @@
 ### Prerequisites
 
 - [Install nvm](https://github.com/nvm-sh/nvm)
-- Use node 16 lts
-  ```
-  $> nvm install 16
-  $> nvm use 16
-  ```
 - Install pm2:
   ```
   yarn global add pm2
@@ -20,6 +15,10 @@
 - Copy the .env.sample and fill it with your environment variables
   ```
   cp .env.sample .env
+  ```
+- Use right version of node:
+  ```
+  nvm use # Based on .nvmrc
   ```
 - Install root project dependencies:
   ```
