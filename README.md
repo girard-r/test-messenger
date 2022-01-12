@@ -21,6 +21,10 @@
   ```
   cp .env.sample .env
   ```
+- Install root project dependencies:
+  ```
+  yarn
+  ```
 - Install server dependencies:
   ```
   cd server
