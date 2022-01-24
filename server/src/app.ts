@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import getLogger, { LogLevel } from "./log";
 import http from "http";
-import { handleFacebookAuth, handleGetPages } from "./facebook";
+import { handleFacebookAuth, handleGetPages, respondToPostbackMessage } from "./facebook";
 import { createServerSocket, MessageInfo } from "./socketio";
 import bodyParser from "body-parser";
 
@@ -43,38 +43,62 @@ app.get("/api/facebook/:socketId/pages", (req, res) => {
 // Taken from https://developers.facebook.com/docs/messenger-platform/getting-started/webhook-setup
 app.post("/webhook", (req, res) => {
   const body = req.body;
-  console.log(req.body);
+  console.dir(req.body, { depth: null });
 
   // Checks this is an event from a page subscription
   if (body.object === "page") {
     // Iterates over each entry - there may be multiple if batched
     body.entry.forEach(function (entry) {
+      // The entry can be either a message or a postback. We'll handle both.
+
       // Gets the message. entry.messaging is an array, but
       // will only ever contain one message, so we get index 0
       const webhookEvent = entry.messaging[0];
-      const message: MessageInfo = {
-        msgId: webhookEvent.message.mid,
-        text: webhookEvent.message.text,
-        timestamp: webhookEvent.timestamp,
-        senderId: webhookEvent.sender.id,
-      };
-      const pageId = entry["id"];
-      Object.keys(socketIOServer.state).forEach((socketId) => {
-        const { pagesInfo } = socketIOServer.state[socketId];
 
-        pagesInfo.map((pageInfo) => {
-          if (pageInfo.id === pageId) {
-            return {
-              ...pageInfo,
-              lastMessageReceived: message,
-            };
-          }
-          return pageInfo;
+      if ('message' in webhookEvent) {
+        // Handle incoming message and send it socket.io clients as lastMessageReceived.
+        const message: MessageInfo = {
+          msgId: webhookEvent.message.mid,
+          text: webhookEvent.message.text,
+          timestamp: webhookEvent.timestamp,
+          senderId: webhookEvent.sender.id,
+        };
+        const pageId = entry["id"];
+        Object.keys(socketIOServer.state).forEach((socketId) => {
+          const { pagesInfo } = socketIOServer.state[socketId];
+
+          pagesInfo.map((pageInfo) => {
+            if (pageInfo.id === pageId) {
+              return {
+                ...pageInfo,
+                lastMessageReceived: message,
+              };
+            }
+            return pageInfo;
+          });
         });
-      });
 
-      // Broadcast the message
-      socketIOServer.io.emit(`newMessage/${pageId}`, { ...message, pageId });
+        // Broadcast the message
+        socketIOServer.io.emit(`newMessage/${pageId}`, { ...message, pageId });
+      } else if ('postback' in webhookEvent) {
+        // Handle postback
+        const postback = webhookEvent.postback;
+        const pageId = entry["id"];
+        const senderId = webhookEvent.sender.id;
+
+        if (postback.payload === 'get_started') {
+          Object.keys(socketIOServer.state).forEach((socketId) => {
+            const { pagesInfo } = socketIOServer.state[socketId];
+            pagesInfo.forEach((pageInfo) => {
+              if (pageInfo.id == pageId) {
+                // Make api call to graphapi sending the response message.
+                logDebug(`Will send a response to ${senderId} on page ${pageId}`);
+                respondToPostbackMessage(pageInfo.accessToken, senderId, 'Got it! You can start now.');
+              }
+            })
+          })
+        }
+      }
     });
 
     // Returns a '200 OK' response to all requests
@@ -106,6 +130,8 @@ app.get("/webhook", (req, res) => {
       // Responds with '403 Forbidden' if verify tokens do not match
       res.sendStatus(403);
     }
+  } else {
+    res.sendStatus(401);
   }
 });
 

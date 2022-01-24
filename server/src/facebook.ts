@@ -162,3 +162,22 @@ export const handleFacebookAuth = async (
     }
   }
 };
+
+export const respondToPostbackMessage = async (pageAccessToken: string, recipient: string, message: string) => {
+  const url = "https://graph.facebook.com/v12.0/me/messages";
+  const payload = {
+    recipient: {
+      id: recipient,
+    },
+    message: {
+      text: message,
+    },
+    messaging_type: "RESPONSE",
+  }
+
+  return axios.post(url, payload, {
+    params: {
+      access_token: pageAccessToken,
+    },
+  })
+}
