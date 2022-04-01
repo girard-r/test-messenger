@@ -28,6 +28,7 @@ export interface ListPagesInfo {
   name: string;
   access_token: string;
   id: string;
+  instagram_business_account?: { id: string };
 }
 
 export const getUserAccessToken = (code: string) => {
@@ -59,7 +60,7 @@ export const getUserPages = (fbUserId: string, userAccessToken: string) => {
   return axios.get(url, {
     params: {
       access_token: userAccessToken,
-      fields: "name,access_token",
+      fields: "name,access_token,instagram_business_account",
     },
   });
 };
@@ -91,10 +92,14 @@ export const handleGetPages = async (
       accessToken
     );
     for (const pageInfo of res.data.data) {
+      console.log(pageInfo);
       socketio.state[socketId].pagesInfo.push({
         name: pageInfo.name,
         accessToken: pageInfo.access_token,
         id: pageInfo.id,
+        instagramAccount: {
+          accountId: pageInfo.instagram_business_account?.id,
+        },
       });
     }
     socketio.io.to(socketId).emit("pages", socketio.state[socketId].pagesInfo);
@@ -158,7 +163,7 @@ export const handleFacebookAuth = async (
         .to(clientSocketId)
         .emit("accessToken", socketio.state[clientSocketId].accessTokenInfo);
     } catch (e) {
-      logError(e);
+      logError(e.message);
     }
   }
 };

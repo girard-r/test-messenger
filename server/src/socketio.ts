@@ -12,11 +12,16 @@ export interface MessageInfo {
   senderId: string;
 }
 
+export interface InstagramAccount {
+  accountId: string;
+}
+
 export interface PageInfo {
   accessToken: string;
   id: string;
   name: string;
   lastMessageReceived?: MessageInfo;
+  instagramAccount?: InstagramAccount;
 }
 
 export interface AccessTokenInfo {

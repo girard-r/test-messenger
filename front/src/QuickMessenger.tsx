@@ -28,29 +28,42 @@ const QuickMessengerPerPage = ({ pageInfo }: QuickMessengerPerPageProps) => {
     socket.on(`newMessage/${pageInfo.id}`, (message) => {
       setLastMessage(message);
     });
+    if (pageInfo.instagramAccount?.accountId) {
+      socket.on(
+        `newMessage/${pageInfo.instagramAccount?.accountId}`,
+        (message) => {
+          setLastMessage(message);
+        }
+      );
+    }
     return () => {
       socket.off(`newMessage/${pageInfo.id}`);
+      if (pageInfo.instagramAccount?.accountId) {
+        socket.off(`newMessage/${pageInfo.instagramAccount?.accountId}`);
+      }
     };
   }, [socket, pageInfo]);
 
   const onSubmit =
     (pageAccessToken: string, recipientId: string) =>
     ({ message }: { message: string }) => {
-      axios.post(
-        "https://graph.facebook.com/v12.0/me/messages",
-        {
-          messaging_type: "RESPONSE",
-          recipient: {
-            id: recipientId,
+      axios
+        .post(
+          "https://graph.facebook.com/v12.0/me/messages",
+          {
+            messaging_type: "RESPONSE",
+            recipient: {
+              id: recipientId,
+            },
+            message: {
+              text: message,
+            },
           },
-          message: {
-            text: message,
-          },
-        },
-        {
-          params: { access_token: pageAccessToken },
-        }
-      );
+          {
+            params: { access_token: pageAccessToken },
+          }
+        )
+        .catch((error) => console.error(error));
       reset();
     };
 

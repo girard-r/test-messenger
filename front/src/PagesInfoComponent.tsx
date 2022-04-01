@@ -27,11 +27,17 @@ const PagesInfoComponent = ({
       <div>
         {pagesInfo.length > 0 &&
           pagesInfo.map((pageInfo) => {
+            console.log(pageInfo);
             return (
               <ul key={`pageInfo-${pageInfo.id}`}>
                 <li>Name: {pageInfo.name}</li>
                 <li>Access Token: {pageInfo.accessToken}</li>
                 <li>ID: {pageInfo.id}</li>
+                {pageInfo.instagramAccount?.accountId && (
+                  <li>
+                    Instagram Account Id: {pageInfo.instagramAccount.accountId}
+                  </li>
+                )}
               </ul>
             );
           })}

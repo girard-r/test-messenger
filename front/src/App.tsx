@@ -20,10 +20,15 @@ export interface AccessTokenInfo {
   userId: string;
 }
 
+export interface InstagramAccount {
+  accountId: string;
+}
+
 export interface FBPageInfo {
   accessToken: string;
   id: string;
   name: string;
+  instagramAccount?: InstagramAccount;
 }
 
 const App = () => {

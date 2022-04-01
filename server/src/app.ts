@@ -44,26 +44,33 @@ app.get("/api/facebook/:socketId/pages", (req, res) => {
 app.post("/webhook", (req, res) => {
   const body = req.body;
   console.log(req.body);
+  console.log(req.headers);
 
   // Checks this is an event from a page subscription
-  if (body.object === "page") {
+  if (["page", "instagram"].includes(body.object)) {
     // Iterates over each entry - there may be multiple if batched
     body.entry.forEach(function (entry) {
       // Gets the message. entry.messaging is an array, but
       // will only ever contain one message, so we get index 0
       const webhookEvent = entry.messaging[0];
+      console.log(webhookEvent);
       const message: MessageInfo = {
-        msgId: webhookEvent.message.mid,
-        text: webhookEvent.message.text,
+        msgId: webhookEvent.message?.mid,
+        text: webhookEvent.message?.text,
         timestamp: webhookEvent.timestamp,
         senderId: webhookEvent.sender.id,
       };
-      const pageId = entry["id"];
+      const resourceId = entry["id"];
       Object.keys(socketIOServer.state).forEach((socketId) => {
         const { pagesInfo } = socketIOServer.state[socketId];
 
+        let found = false;
         pagesInfo.map((pageInfo) => {
-          if (pageInfo.id === pageId) {
+          if (
+            pageInfo.id === resourceId ||
+            pageInfo.instagramAccount?.accountId === resourceId
+          ) {
+            found = true;
             return {
               ...pageInfo,
               lastMessageReceived: message,
@@ -71,10 +78,17 @@ app.post("/webhook", (req, res) => {
           }
           return pageInfo;
         });
+        if (!found) {
+          // Instagram account
+          console.log("This is an Instagram account");
+        }
       });
 
       // Broadcast the message
-      socketIOServer.io.emit(`newMessage/${pageId}`, { ...message, pageId });
+      socketIOServer.io.emit(`newMessage/${resourceId}`, {
+        ...message,
+        resourceId,
+      });
     });
 
     // Returns a '200 OK' response to all requests
