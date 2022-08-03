@@ -34,6 +34,10 @@ app.get("/api/facebook/login", (req, res) => {
   res.send("<script>window.close();</script>");
 });
 
+app.get("/webhooks", (req, res) => {
+  res.sendStatus(parseInt(process.env.STATUS_CODE_TO_RETURN));
+});
+
 app.get("/api/facebook/:socketId/pages", (req, res) => {
   const { socketId } = req.params;
   handleGetPages(socketId, socketIOServer);
