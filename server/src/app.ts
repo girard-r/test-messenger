@@ -35,6 +35,7 @@ app.get("/api/facebook/login", (req, res) => {
 });
 
 app.get("/webhooks", (req, res) => {
+  console.log(req.query);
   res.sendStatus(parseInt(process.env.STATUS_CODE_TO_RETURN));
 });
 
